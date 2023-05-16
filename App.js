@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import CustomDrawerContent from './components/CustomDrawerContent';
+import HomeScreen from './screens/HomeScreen';
+import { EventRegister } from "react-native-event-listeners";
+import LoginScreen from './screens/LoginScreen';
+import themeContext from './config/themeContext';
+import theme from "./config/theme";
+import BottomNav from "./components/BottomNav";
+
+const Drawer = createDrawerNavigator();
 
 export default function App() {
+  const [mode, setMode] = useState(false);
+
+  useEffect(() => {
+    let eventListener = EventRegister.addEventListener(
+      "changeTheme",
+      (data) => {
+        setMode(data);
+      }
+    );
+    return () => {
+      EventRegister.removeEventListener(eventListener);
+    };
+  });
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <themeContext.Provider value={mode === true ? theme.dark : theme.light}>
+      <NavigationContainer>
+        <Drawer.Navigator
+          useLegacyImplementation
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Screen name="Login" component={LoginScreen} />
+          <Drawer.Screen name="BottomNav" component={BottomNav} />
+          <Drawer.Screen name="Home" component={HomeScreen} />
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </themeContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
